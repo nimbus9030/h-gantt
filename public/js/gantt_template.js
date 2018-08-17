@@ -127,6 +127,7 @@ $('[type="TASKSEDITRESOURCEHEAD"].__template__').html(
       <th class="gdfColHeader" style="width:35px; border-right: none"></th>\
       <th class="gdfColHeader" style="width:25px;"></th>\
       <th class="gdfColHeader gdfResizable" style="width:400px;">name</th>\
+      <th class="gdfColHeader gdfResizable" style="width:100px;">Task Cost</th>\
       <th class="gdfColHeader gdfResizable" style="width:100px;">Standard Rate</th>\
       <th class="gdfColHeader gdfResizable" style="width:80px;">Work Days</th>\
       <th class="gdfColHeader gdfResizable" style="width:80px;">Progress</th>\
@@ -144,6 +145,7 @@ $('[type="TASKRESOURCEROW"].__template__').html(
       <div class="exp-controller" align="center"></div>\
       <input type="text" name="name" value="(#=obj.name#)" autocomplete="off" placeholder="name">\
     </td>\
+    <td class="gdfCell"><input type="text" name="cost" autocomplete="off" value="(#=obj.cost#)" readonly></td>\
     <td class="gdfCell"><input type="text" name="rate" autocomplete="off" value="(#=obj.duration#)"></td>\
     <td class="gdfCell"><input type="text" name="effort" autocomplete="off" value="(#=getMillisInDays(obj.effort)#)" class=""></td>\
     <td class="gdfCell"><input type="text" name="progress" class="" entrytype="PERCENTILE" autocomplete="off" value="(#=obj.progress#)"></td>\
@@ -155,6 +157,7 @@ $('[type="TASKEMPTYRESOURCEROW"].__template__').html(
   <tr class="taskEditRow emptyRow" >\
     <th class="gdfCell" align="right"></th>\
     <td class="gdfCell noClip" align="center"></td>\
+    <td class="gdfCell"></td>\
     <td class="gdfCell"></td>\
     <td class="gdfCell"></td>\
     <td class="gdfCell"></td>\

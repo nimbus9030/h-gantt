@@ -161,12 +161,29 @@ GridResEditor.prototype.refreshTaskRow = function (task) {
   row.find(".indentCell").css("padding-left", task.level * 10 + 18);
   row.find("[name=name]").val(task.name);
   if (task.level == 0) {
-     row.find("[name=rate]").val(task.rate);
+    row.find("[name=rate]").val(task.rate);
+    var totalcost = 0.0;
+    for(var i = 0; i < this.master.tasks.length;i++) {
+      if(this.master.tasks[i].assigs.length > 0) {
+        for (var j=0;j<this.master.tasks[i].assigs.length;j++) {
+          totalcost += task.rate * this.master.tasks[i].assigs[j].effort / 28800000;
+          break;
+        }
+      }
+    }
+    row.find("[name=cost]").val(totalcost.toFixed(2));
   }
   else if (task.level == 1) {
     row.find("[name=progress]").val(task.progress);
+
     var effort = task.effort / 28800000;
     row.find("[name=effort]").val(effort.toFixed(2));
+    var resource = this.master.getResource(task.resourceId);
+    if (resource) {
+      row.find("[name=cost]").val((effort * resource.rate).toFixed(2));
+    }
+    else
+      row.find("[name=cost]").val("???");
   }
   //jkk row.find("[name=code]").val(task.code);
   // row.find("[status]").attr("status", task.status);
