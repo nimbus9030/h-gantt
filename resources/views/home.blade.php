@@ -92,6 +92,9 @@
 .fixed150 {
     width: 150px;
 }
+#projectTable td:hover:not(.never) {
+    cursor: pointer;
+}
 </style>
 @endsection
 

@@ -357,7 +357,8 @@ EOF;
         'canWrite' => true,
         'canDelete' => true,
         'canWriteOnParent' => true,
-        'canAdd' => true
+        'canAdd' => true,
+        'zoom' => "1M"
       );
       return $ganttData;
     }
@@ -404,7 +405,11 @@ EOF;
           'tasks.*.project_id' => 'integer',//for new tasks, this will be blank
           'tasks.*.hasChild' => 'required|integer',
           // "assign": []
-          "deletedTaskIds" => 'array'
+          "deletedTaskIds" => 'array',
+          'resources.*.resourceId' => 'required|alpha_num',
+          'resources.*.level' => 'required|integer',
+          'resources.*.name' => 'required|string',
+          'resources.*.rate' => 'numeric',//floating point
       ]);
 
       $errors = $validator->errors();
@@ -415,6 +420,10 @@ EOF;
         $task = new Task;
         $task->project_id = $request->input('project_id');
         $response = $task->saveMultiple($data);
+        if ($response["stat"]) {
+          $resource = new Resource;
+          $response = $resource->saveMultiple($data["resources"]);
+        }
       }
       return $response;
     }

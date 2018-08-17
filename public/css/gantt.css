@@ -15,14 +15,15 @@ body{
 }
 
 /* -------------------------------------- GRIDIFY -----------------------------------*/
-.gdfTable {
+.gdfTable,.gdfResTable {
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   background-color: #fff;
 }
 
-.gdfTable td, .gdfTable th {
+.gdfTable td, .gdfTable th,
+.gdfResTable td, .gdfResTable th {
   vertical-align: middle;
   overflow: hidden;
   text-overflow: clip;

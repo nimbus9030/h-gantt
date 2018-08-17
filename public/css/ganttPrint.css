@@ -45,7 +45,7 @@ BODY, TBODY {
   display: none !important;
 }
 
-.gdfTable{
+.gdfTable,.gdfResTable{
    width: 0 !important;
  }
 

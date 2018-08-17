@@ -29,6 +29,7 @@ function GridEditor(master) {
 
   this.gridified = $.gridify(editorTabel);
   this.element = this.gridified.find(".gdfTable").eq(1);
+  this.elementHeight = 0;//jkk added for ganttDrawerSVG
 
   this.minAllowedDate=new Date(new Date().getTime()-3600000*24*365*20).format();
   this.maxAllowedDate=new Date(new Date().getTime()+3600000*24*365*30).format();
@@ -36,7 +37,7 @@ function GridEditor(master) {
 
 
 GridEditor.prototype.fillEmptyLines = function () {
-  //console.debug("fillEmptyLines")
+  // console.debug("fillEmptyLines")
   var factory = new TaskFactory();
   var master = this.master;
 
@@ -87,9 +88,8 @@ GridEditor.prototype.fillEmptyLines = function () {
 
 
 GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
-  //console.debug("GridEditor.addTask",task,row);
+  // console.debug("GridEditor.addTask",task,row);
   //var prof = new Profiler("ganttGridEditor.addTask");
-
   //remove extisting row
   this.element.find("#tid_" + task.id).remove();
 
@@ -273,7 +273,7 @@ GridEditor.prototype.bindRowExpandEvents = function (task, taskRow) {
 
 GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   var self = this;
-
+// console.log("grideditor:bindRowInputEvents");
   //bind dateField on dates
   taskRow.find(".date").each(function () {
     var el = $(this);
@@ -576,6 +576,9 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
   for (var i = 0; i < task.assigs.length; i++) {
     var assig = task.assigs[i];
     var assigRow = $.JST.createFromTemplate({task: task, assig: assig}, "ASSIGNMENT_ROW");
+    console.log("assignemnts");
+    console.log(task);
+    console.log(assig);
     assigsTable.append(assigRow);
   }
 
@@ -628,7 +631,10 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
     //save task
     taskEditor.bind("saveFullEditor.gantt",function () {
       //console.debug("saveFullEditor");
+      var oldviewing = self.master.viewing;//jkk preserve viewing. maybe we should make a master.getResTask() function
+      self.master.viewing = 0;
       var task = self.master.getTask(taskId); // get task again because in case of rollback old task is lost
+      self.master.viewing = oldviewing;
 
       self.master.beginTransaction();
       task.name = taskEditor.find("#name").val();
@@ -646,6 +652,7 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
 
       //set assignments
       var cnt=0;
+      var totalEffort = 0;
       taskEditor.find("tr[assId]").each(function () {
         var trAss = $(this);
         var assId = trAss.attr("assId");
@@ -654,7 +661,12 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
         var roleId = trAss.find("[name=roleId]").val();
         //jkk force the value to always be in 'days'
         var effort = trAss.find("[name=effort]").val() + "D";
-        var effort = millisFromString(effort,true);
+        if (effort === "D")
+          effort = 0;
+        else
+          effort = millisFromString(effort,true);
+
+        totalEffort += effort;
 
         //check if the selected resource exists in ganttMaster.resources
         var res= self.master.getOrCreateResource(resId,resName);
@@ -689,6 +701,9 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
           cnt++;
           var ass = task.createAssignment("tmp_" + new Date().getTime()+"_"+cnt, resId, roleId, effort);
           ass.touched = true;
+          ass.effort = effort;
+          ass.taskId = task.id;
+          console.log("saveFullEditor.gantt i="+i+" taskid="+task.id);
         }
 
       });
@@ -700,7 +715,14 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
         return ret;
       });
 
-      //change dates
+      //change duration: convert from workdays in milliseconds to full days and set new duration
+      totalEffort = (totalEffort / 28800000);
+      if (totalEffort > 0) {
+        var dur = taskEditor.find("[name=duration]");
+        dur.val(Math.round(totalEffort));
+        resynchDates(dur, taskEditor.find("[name=start]"), taskEditor.find("[name=startIsMilestone]"), dur, taskEditor.find("[name=end]"), taskEditor.find("[name=endIsMilestone]"));
+      }
+
       task.setPeriod(Date.parseString(taskEditor.find("#start").val()).getTime(), Date.parseString(taskEditor.find("#end").val()).getTime() + (3600000 * 22));
 
       //change status
@@ -708,6 +730,9 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
 
       if (self.master.endTransaction()) {
         taskEditor.find(":input").updateOldValue();
+        console.log(self.master.resources);
+        console.log(self.master.tasks);
+        self.master.loadResTasks(self.master.resources,self.master.tasks);
         closeBlackPopup();
       }
 

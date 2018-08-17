@@ -104,7 +104,12 @@ cc{!! $templates["GANTBUTTONS"] !!}dd --}}
     </thead>
   </table>
   --></div>
-
+<div class="__template__" type="TASKSEDITRESOURCEHEAD">
+</div>
+<div class="__template__" type="TASKRESOURCEROW">
+</div>
+<div class="__template__" type="TASKEMPTYRESOURCEROW">
+</div>
 <div class="__template__" type="TASKROW">
     {{-- {!! $templates["TASKROW"] !!} --}}
 <!--
@@ -301,6 +306,8 @@ cc{!! $templates["GANTBUTTONS"] !!}dd --}}
   </tr>
   --></div>
 
+<div class="__template__" type="RESOURCE_DETAIL_EDITOR">
+</div>
 
 </div>
 @endsection
@@ -333,7 +340,9 @@ cc{!! $templates["GANTBUTTONS"] !!}dd --}}
   margin: 5px;
   border: 1px solid #d0d0d0;
 }
-
+.hide {
+  display: none;
+}
 body {
   /*overflow: hidden;*/
 }
@@ -346,6 +355,10 @@ body {
 }
 svg:not(:root) {
   overflow: none !important;
+}
+.disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5;
 }
 </style>
 @endsection
@@ -374,9 +387,11 @@ svg:not(:root) {
 
   <script src="/js/ganttUtilities.js"></script>
   <script src="/js/ganttTask.js"></script>
+   <script src="/js/ganttResTask.js"></script>
   <script src="/js/ganttDrawerSVG.js"></script>
   <script src="/js/ganttZoom.js"></script>
   <script src="/js/ganttGridEditor.js"></script>
+  <script src="/js/ganttResEditor.js"></script>
   <script src="/js/ganttMaster.js"></script>
   <script src="/js/gantt_template.js"></script>
 

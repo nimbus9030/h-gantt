@@ -32,7 +32,7 @@ $.gridify = function (table, opt) {
   box.append(table);
 
   var head = table.clone();
-  head.addClass("table ganttFixHead");
+  head.addClass("tableGantt ganttFixHead");//jkk changed. .table will be overridden by laravel's app.css
   //remove non head
   head.find("tbody").remove();
   box.append(head);
@@ -103,9 +103,9 @@ $.gridify = function (table, opt) {
         //manage resizing
         var w = e.pageX - $.gridify.columInResize.offset().left;
         w = w <= 1 ? 1 : w;
+        console.log("resizing to w="+w);
         $.gridify.columInResize.width(w);
         $.gridify.columInResize.data("fTh").width(w);
-
 
         //on mouse up on body to stop resizing
       }).on("mouseup.gdf", function () {
@@ -184,6 +184,169 @@ $.gridify = function (table, opt) {
   return box;
 };
 
+//jkk added
+$.resGridify = function (table, opt) {
+  var options = {
+    resizeZoneWidth: 10
+  };
+
+  $.extend(options, opt);
+
+  var box = $("<div>").addClass("gdfWrapper hide");
+  box.append(table);
+
+  var head = table.clone();
+  head.addClass("tableGantt ganttFixHead");//jkk changed. .table will be overridden by laravel's app.css
+  //remove non head
+  head.find("tbody").remove();
+  box.append(head);
+
+  box.append(table);
+
+  var hTh = head.find(".gdfColHeader");
+  var cTh = table.find(".gdfColHeader");
+  for (var i = 0; i < hTh.length; i++) {
+    hTh.eq(i).data("fTh", cTh.eq(i));
+  }
+
+  //--------- set table to 0 to prevent a strange 100%
+  table.width(0);
+  head.width(0);
+
+
+  //----------------------  header management start
+  head.find("th.gdfColHeader:not(.gdfied)").mouseover(function () {
+    $(this).addClass("gdfColHeaderOver");
+
+  }).on("mouseout.gdf", function () {
+    $(this).removeClass("gdfColHeaderOver");
+    if (!$.resGridify.columInResize) {
+      $("body").removeClass("gdfHResizing");
+    }
+
+  }).on("mousemove.gdf", function (e) {
+    if (!$.resGridify.columInResize) {
+      var colHeader = $(this);
+      var nextCol = colHeader.next();
+      if (nextCol.length > 0 && nextCol.width() < options.resizeZoneWidth)
+        colHeader = nextCol;
+
+      if (!colHeader.is(".gdfResizable"))
+        return;
+
+      var mousePos = e.pageX - colHeader.offset().left;
+
+      if (colHeader.width() - mousePos < options.resizeZoneWidth) {
+        $("body").addClass("gdfHResizing");
+      } else {
+        $("body").removeClass("gdfHResizing");
+      }
+    }
+
+  }).on("mousedown.gdf", function (e) {
+    //console.debug("mousedown.gdf")
+    var colHeader = $(this);
+
+    var nextCol = colHeader.next();
+    if (nextCol.length > 0 && nextCol.width() < options.resizeZoneWidth)
+      colHeader = nextCol;
+
+    if (!colHeader.is(".gdfResizable"))
+      return;
+
+    var mousePos = e.pageX - colHeader.offset().left;
+    if (colHeader.width() - mousePos < options.resizeZoneWidth) {
+      $("body").unselectable();
+      $.resGridify.columInResize = colHeader;
+      //on event for start resizing
+      $(document).on("mousemove.gdf", function (e) {
+
+        e.preventDefault();
+        $("body").addClass("gdfHResizing");
+
+        //manage resizing
+        var w = e.pageX - $.resGridify.columInResize.offset().left;
+        w = w <= 1 ? 1 : w;
+        $.resGridify.columInResize.width(w);
+        $.resGridify.columInResize.data("fTh").width(w);
+
+
+        //on mouse up on body to stop resizing
+      }).on("mouseup.gdf", function () {
+        //console.debug("mouseup.gdf")
+        $(this).off("mousemove.gdf").off("mouseup.gdf").clearUnselectable();
+        $("body").removeClass("gdfHResizing");
+        delete $.resGridify.columInResize;
+
+        //save columns dimension
+        storeGridState();
+
+      });
+    }
+
+  }).on("dblclick.gdf", function () {
+    //console.debug("dblclick.gdf")
+    var col = $(this);
+
+    if (!col.is(".gdfResizable"))
+      return;
+
+    var idx = $("th", col.parents("table")).index(col);
+    var columnTd = $("td:nth-child(" + (idx + 1) + ")", table);
+    var w = 0;
+    columnTd.each(function () {
+      var td = $(this);
+      var content = td.children("input").length ? td.children("input").val() : td.html();
+      var tmp = $("<div/>").addClass("columnWidthTest").html(content).css({position: "absolute"});
+      $("body").append(tmp);
+      w = Math.max(w, tmp.width() + parseFloat(td.css("padding-left")));
+      tmp.remove();
+    });
+
+    w = w + 5;
+    col.width(w);
+    col.data("fTh").width(w);
+
+    //save columns dimension
+    storeGridState();
+    return false;
+
+  }).addClass("gdfied unselectable").attr("unselectable", "true");
+
+
+  function storeGridState() {
+    //console.debug("storeGridState");
+    if (localStorage) {
+      var gridState = {};
+
+      var colSizes = [];
+      $(".gdfResTable .gdfColHeader").each(function () {
+        colSizes.push($(this).outerWidth());
+      });
+
+      gridState.colSizes = colSizes;
+
+      localStorage.setObject("TWPGanttResState", gridState);
+    }
+  }
+
+  function loadGridState() {
+    //console.debug("loadGridState")
+    if (localStorage) {
+      if (localStorage.getObject("TWPGanttResState")) {
+        var gridState = localStorage.getObject("TWPGanttResState");
+        if (gridState.colSizes) {
+          box.find(".gdfResTable .gdfColHeader").each(function (i) {
+            $(this).width(gridState.colSizes[i]);
+          });
+        }
+      }
+    }
+  }
+
+  loadGridState();
+  return box;
+};
 
 
 
@@ -477,10 +640,17 @@ function resynchDates(leavingField, startField, startMilesField, durationField, 
 
   function resynchDatesSetFields(command) {
     //console.debug("resynchDatesSetFields",command);
-    var duration = stringToDuration(durationField.val());
-    var start = computeStart(Date.parseString(startField.val()).getTime());
+    if (leavingField==null) {
+      var duration = durationField;
+      var start = computeStart(startField);
+      var end = endField;
+    }
+    else {
+      var duration = stringToDuration(durationField.val());
+      var start = computeStart(Date.parseString(startField.val()).getTime());
+      var end = endField.val();
+    }
 
-    var end = endField.val();
     if (end.length > 0) {
       end = Date.parseString(end);
       end.setHours(23, 59, 59, 999); //this is necessary because compute end get the closest end, and parseString returns 00:00
@@ -503,23 +673,35 @@ function resynchDates(leavingField, startField, startMilesField, durationField, 
     } else if ("CHANGE_DURATION" == command) {
       duration = getDurationInUnits(new Date(start),new Date(end)) + 1; 
     }
-
-    startField.val(new Date(start).format());
-    endField.val(new Date(end).format());
-    durationField.val(durationToString(duration));
+    if (leavingField!=null) {
+      startField.val(new Date(start).format());
+      endField.val(new Date(end).format());
+      durationField.val(durationToString(duration));
+    }
 
     return {start: start, end: end, duration: duration};
   }
-
-  var leavingFieldName = leavingField.prop("name");
-  var durIsFilled = durationField.val().length > 0;
-  var startIsFilled = startField.val().length > 0;
-  var endIsFilled = endField.val().length > 0;
-  var startIsMilesAndFilled = startIsFilled && (startMilesField.prop("checked") || startField.is("[readOnly]"));
-  var endIsMilesAndFilled = endIsFilled && (endMilesField.prop("checked") || endField.is("[readOnly]"));
+  //jkk to support workdays calculation to change duration. 
+  if (leavingField == null) {
+    var leavingFieldName = "duration";
+    var durIsFilled = durationField;
+    var startIsFilled = startField;
+    var endIsFilled = endField;
+    var startIsMilesAndFilled = startIsFilled && startMilesField;
+    var endIsMilesAndFilled = endIsFilled && endMilesField;
+  }
+  else {
+    var leavingFieldName = leavingField.prop("name");
+    var durIsFilled = durationField.val().length > 0;
+    var startIsFilled = startField.val().length > 0;
+    var endIsFilled = endField.val().length > 0;
+    var startIsMilesAndFilled = startIsFilled && (startMilesField.prop("checked") || startField.is("[readOnly]"));
+    var endIsMilesAndFilled = endIsFilled && (endMilesField.prop("checked") || endField.is("[readOnly]"));
+  }
 
   if (durIsFilled) {
-    durationField.val(durationToString(stringToDuration(durationField.val())));
+    if (leavingField != null)
+      durationField.val(durationToString(stringToDuration(durationField.val())));
   }
 
   if (leavingFieldName.indexOf("Milestone") > 0) {
@@ -534,7 +716,8 @@ function resynchDates(leavingField, startField, startMilesField, durationField, 
   //need at least two values to resynch the third
   if ((durIsFilled ? 1 : 0) + (startIsFilled ? 1 : 0) + (endIsFilled ? 1 : 0) < 2)
     return;
-
+    console.log("ffffffffffffff");
+    console.log("fff "+durIsFilled+" "+endIsMilesAndFilled+" "+startIsMilesAndFilled);
   var ret;
   if (leavingFieldName == 'start' && startIsFilled) {
     if (endIsMilesAndFilled && durIsFilled) {
@@ -544,6 +727,7 @@ function resynchDates(leavingField, startField, startMilesField, durationField, 
     }
 
   } else if (leavingFieldName == 'duration' && durIsFilled && !(endIsMilesAndFilled && startIsMilesAndFilled)) {
+
     if (endIsMilesAndFilled && !startIsMilesAndFilled) {
       ret = resynchDatesSetFields("CHANGE_START");
     } else if (!endIsMilesAndFilled) {

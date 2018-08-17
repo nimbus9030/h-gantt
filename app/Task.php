@@ -56,9 +56,8 @@ class Task extends Model
             'has_child as hasChild'
 		)->get()->toArray();
 		foreach($tasks as $idx=>$task) {
-			$tasks[$idx]["assign"] = Assig::getAssignments($task);
+			$tasks[$idx]["assigs"] = Assig::getAssignments($task);
 		}
-
 		return $tasks;
 	}
 
@@ -72,7 +71,7 @@ class Task extends Model
 			}
 			DB::beginTransaction();
 			$bError = false;
-
+			$assig = new Assig();
 			foreach($taskArray["tasks"] as $task) {
 
 				if (gettype($task["id"]) == "string") {
@@ -101,7 +100,10 @@ class Task extends Model
 						$this->has_child = $task["hasChild"];
 					//new record
 					$result = $this->save();
-
+					if ($result) {
+						//save assignment(s) - even if $task["assigs"] is null
+						$res1 = $assig->setAssignments($task["assigs"],$this->id);
+					}
 					$response["new_ids"][] = array($task["id"] => $this->id);
 				}
 				else {
@@ -131,6 +133,10 @@ class Task extends Model
 						'collapsed' => $task["collapsed"],
 						'has_child' => $task["hasChild"]
 					]);
+					if ($result) {
+						//save assignment(s) - even if $task["assigs"] is null
+						$res1 = $assig->setAssignments($task["assigs"],$task["id"]);
+					}
 				}
 				if ($result === false) {
 					$bError = true;
@@ -166,6 +172,7 @@ class Task extends Model
 			$response["error"] = $e->getMessages();
 			DB::rollback();
 		}
+		// dd("done");
 		return $response;
 	}
 }

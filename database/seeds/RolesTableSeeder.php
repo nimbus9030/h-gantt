@@ -13,22 +13,30 @@ class RolesTableSeeder extends Seeder
     {
 	    $role = array(
 	      'name' => 'Project Manager',
+	      'created_at' => DB::raw('NOW()'),
+	      'updated_at' => DB::raw('NOW()'),
 	  	);
 
 	     DB::table('roles')->insert($role);
 
  	    $role = array(
 	      'name' => 'Worker'
+	      'created_at' => DB::raw('NOW()'),
+	      'updated_at' => DB::raw('NOW()'),
 	  	);
 
 	     DB::table('roles')->insert($role);
  	    $role = array(
 	      'name' => 'Stakeholder'
+	      'created_at' => DB::raw('NOW()'),
+	      'updated_at' => DB::raw('NOW()'),
 	  	);
 
 	     DB::table('roles')->insert($role);
  	    $role = array(
-	      'name' => 'Customer'
+	      'name' => 'Customer',
+	      'created_at' => DB::raw('NOW()'),
+	      'updated_at' => DB::raw('NOW()'),
 	  	);
 
 	     DB::table('roles')->insert($role);

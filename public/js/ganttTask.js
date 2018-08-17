@@ -91,6 +91,7 @@ Task.prototype.getAssigsString = function () {
   var ret = "";
   for (var i = 0; i < this.assigs.length; i++) {
     var ass = this.assigs[i];
+    ass.id = ass.id.toString();//since new ids are strings, all 'ids' must be strings as well
     var res = this.master.getResource(ass.resourceId);
     if (res) {
       ret = ret + (ret == "" ? "" : ", ") + res.name;
@@ -814,7 +815,7 @@ Task.prototype.getInferiorTasks = function () {
 };
 
 Task.prototype.deleteTask = function () {
-  //console.debug("deleteTask",this.name,this.master.deletedTaskIds)
+  console.debug("Task:deleteTask",this.name,this.master.deletedTaskIds)
   //if is the current one remove it
   if (this.master.currentTask && this.master.currentTask.id==this.id)
     delete this.master.currentTask;
@@ -1220,6 +1221,7 @@ function Assignment(id, resourceId, roleId, effort) {
 function Resource(id, name) {
   this.id = id;
   this.name = name;
+  this.rate = 0;
 }
 
 

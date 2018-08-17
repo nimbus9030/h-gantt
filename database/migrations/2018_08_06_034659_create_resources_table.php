@@ -16,6 +16,7 @@ class CreateResourcesTable extends Migration
         Schema::create('resources', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name')->nullable(false);
+            $table->float('rate')->default(0);
             $table->boolean('delete_flag')->default(false);
             $table->timestamps();
         });

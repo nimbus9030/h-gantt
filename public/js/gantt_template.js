@@ -13,17 +13,17 @@ $(function() {
     <div class="buttons">\
       <a href="https://gantt.twproject.com/"><img src="res/twGanttLogo.png" alt="Twproject" align="absmiddle" style="max-width: 136px; padding-right: 15px"></a>\
 \
-      <button onclick="$(\'#workSpace\').trigger(\'undo.gantt\');return false;" class="button textual icon requireCanWrite" title="undo"><span class="teamworkIcon">&#39;</span></button>\
-      <button onclick="$(\'#workSpace\').trigger(\'redo.gantt\');return false;" class="button textual icon requireCanWrite" title="redo"><span class="teamworkIcon">&middot;</span></button>\
+      <button onclick="if(!$(this).hasClass(\'disabled\')){$(\'#workSpace\').trigger(\'undo.gantt\');}return false;" class="taskEditOnly button textual icon requireCanWrite" title="undo"><span class="teamworkIcon">&#39;</span></button>\
+      <button onclick="if(!$(this).hasClass(\'disabled\')){$(\'#workSpace\').trigger(\'redo.gantt\');}return false;" class="taskEditOnly button textual icon requireCanWrite" title="redo"><span class="teamworkIcon">&middot;</span></button>\
       <span class="ganttButtonSeparator requireCanWrite requireCanAdd"></span>\
-      <button onclick="$(\'#workSpace\').trigger(\'addAboveCurrentTask.gantt\');return false;" class="button textual icon requireCanWrite requireCanAdd" title="insert above"><span class="teamworkIcon">l</span></button>\
-      <button onclick="$(\'#workSpace\').trigger(\'addBelowCurrentTask.gantt\');return false;" class="button textual icon requireCanWrite requireCanAdd" title="insert below"><span class="teamworkIcon">X</span></button>\
+      <button onclick="if(!$(this).hasClass(\'disabled\')){$(\'#workSpace\').trigger(\'addAboveCurrentTask.gantt\');}return false;" class="taskEditOnly button textual icon requireCanWrite requireCanAdd" title="insert above"><span class="teamworkIcon">l</span></button>\
+      <button onclick="if(!$(this).hasClass(\'disabled\')){$(\'#workSpace\').trigger(\'addBelowCurrentTask.gantt\');}return false;" class="taskEditOnly button textual icon requireCanWrite requireCanAdd" title="insert below"><span class="teamworkIcon">X</span></button>\
       <span class="ganttButtonSeparator requireCanWrite requireCanInOutdent"></span>\
-      <button onclick="$(\'#workSpace\').trigger(\'outdentCurrentTask.gantt\');return false;" class="button textual icon requireCanWrite requireCanInOutdent" title="un-indent task"><span class="teamworkIcon">.</span></button>\
-      <button onclick="$(\'#workSpace\').trigger(\'indentCurrentTask.gantt\');return false;" class="button textual icon requireCanWrite requireCanInOutdent" title="indent task"><span class="teamworkIcon">:</span></button>\
+      <button onclick="if(!$(this).hasClass(\'disabled\')){$(\'#workSpace\').trigger(\'outdentCurrentTask.gantt\');}return false;" class="taskEditOnly button textual icon requireCanWrite requireCanInOutdent" title="un-indent task"><span class="teamworkIcon">.</span></button>\
+      <button onclick="if(!$(this).hasClass(\'disabled\')){$(\'#workSpace\').trigger(\'indentCurrentTask.gantt\');}return false;" class="taskEditOnly button textual icon requireCanWrite requireCanInOutdent" title="indent task"><span class="teamworkIcon">:</span></button>\
       <span class="ganttButtonSeparator requireCanWrite requireCanMoveUpDown"></span>\
-      <button onclick="$(\'#workSpace\').trigger(\'moveUpCurrentTask.gantt\');return false;" class="button textual icon requireCanWrite requireCanMoveUpDown" title="move up"><span class="teamworkIcon">k</span></button>\
-      <button onclick="$(\'#workSpace\').trigger(\'moveDownCurrentTask.gantt\');return false;" class="button textual icon requireCanWrite requireCanMoveUpDown" title="move down"><span class="teamworkIcon">j</span></button>\
+      <button onclick="if(!$(this).hasClass(\'disabled\')){$(\'#workSpace\').trigger(\'moveUpCurrentTask.gantt\');}return false;" class="taskEditOnly button textual icon requireCanWrite requireCanMoveUpDown" title="move up"><span class="teamworkIcon">k</span></button>\
+      <button onclick="if(!$(this).hasClass(\'disabled\')){$(\'#workSpace\').trigger(\'moveDownCurrentTask.gantt\');}return false;" class="taskEditOnly button textual icon requireCanWrite requireCanMoveUpDown" title="move down"><span class="teamworkIcon">j</span></button>\
       <span class="ganttButtonSeparator requireCanWrite requireCanDelete"></span>\
       <button onclick="$(\'#workSpace\').trigger(\'deleteFocused.gantt\');return false;" class="button textual icon delete requireCanWrite" title="Delete Task"><span class="teamworkIcon">&cent;</span></button>\
       <span class="ganttButtonSeparator"></span>\
@@ -51,6 +51,8 @@ $(function() {
     <button onclick="newProject();" class="button requireWrite newproject"><em>clear project</em></button>\
     <button class="button login" title="login/enroll" onclick="loginEnroll($(this));" style="display:none;">login/enroll</button>\
     <button class="button opt collab" title="Start with Twproject" onclick="collaborate($(this));" style="display:none;"><em>collaborate</em></button>\
+    <span class="ganttButtonSeparator requireCanSeeCriticalPath"></span>\
+    <button onclick="editDetailResources();" class="button textual requireWrite toggleEditor" title="resource view"><span class="teamworkIcon">M</span></button>\
     </div></div>\
 -->');
 
@@ -115,6 +117,53 @@ $('[type="TASKEMPTYROW"].__template__').html(
   </tr>\
   -->');
 
+/****************** resource editor *********************/
+
+$('[type="TASKSEDITRESOURCEHEAD"].__template__').html(
+'<!--\
+  <table class="gdfResTable" cellspacing="0" cellpadding="0">\
+    <thead>\
+    <tr style="height:40px">\
+      <th class="gdfColHeader" style="width:35px; border-right: none"></th>\
+      <th class="gdfColHeader" style="width:25px;"></th>\
+      <th class="gdfColHeader gdfResizable" style="width:400px;">name</th>\
+      <th class="gdfColHeader gdfResizable" style="width:100px;">Standard Rate</th>\
+      <th class="gdfColHeader gdfResizable" style="width:80px;">Work Days</th>\
+      <th class="gdfColHeader gdfResizable" style="width:80px;">Progress</th>\
+    </tr>\
+    </thead>\
+  </table>\
+  -->');
+
+$('[type="TASKRESOURCEROW"].__template__').html(
+'<!--\
+  <tr id="rid_(#=obj.id#)" taskId="(#=obj.id#)" class="taskEditRow (#=obj.isParent()?\'isParent\':\'\'#) (#=obj.collapsed?\'collapsed\':\'\'#)" level="(#=level#)">\
+    <th class="gdfCell edit" align="right" style="cursor:pointer;"><span class="taskRowIndex">(#=obj.getRow()+1#)</span> <span class="teamworkIcon" style="font-size:12px;" >e</span></th>\
+    <td class="gdfCell noClip" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>\
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10+18#)px;">\
+      <div class="exp-controller" align="center"></div>\
+      <input type="text" name="name" value="(#=obj.name#)" autocomplete="off" placeholder="name">\
+    </td>\
+    <td class="gdfCell"><input type="text" name="rate" autocomplete="off" value="(#=obj.duration#)"></td>\
+    <td class="gdfCell"><input type="text" name="effort" autocomplete="off" value="(#=getMillisInDays(obj.effort)#)" class=""></td>\
+    <td class="gdfCell"><input type="text" name="progress" class="" entrytype="PERCENTILE" autocomplete="off" value="(#=obj.progress#)"></td>\
+  </tr>\
+  -->');
+
+$('[type="TASKEMPTYRESOURCEROW"].__template__').html(
+'<!--\
+  <tr class="taskEditRow emptyRow" >\
+    <th class="gdfCell" align="right"></th>\
+    <td class="gdfCell noClip" align="center"></td>\
+    <td class="gdfCell"></td>\
+    <td class="gdfCell"></td>\
+    <td class="gdfCell"></td>\
+    <td class="gdfCell"></td>\
+  </tr>\
+  -->');
+
+/****************** resource editor *********************/
+
 $('[type="TASKBAR"].__template__').html(
 '<!--\
   <div class="taskBox taskBoxDiv" taskId="(#=obj.id#)" >\
@@ -147,7 +196,7 @@ $('[type="TASK_EDITOR"].__template__').html(
     <h2 class="taskData">Task editor</h2>\
     <table  cellspacing="1" cellpadding="5" width="100%" class="taskData table" border="0">\
           <tr>\
-        <td width="200" style="height: 80px"  valign="top">\
+        <td width="200" style="height: 40px"  valign="top">\
           <label for="code">code/short name</label><br>\
           <input type="text" name="code" id="code" value="" size=15 class="formElements" autocomplete=\'off\' maxlength=255 style=\'width:100%\' oldvalue="1">\
         </td>\
@@ -173,7 +222,7 @@ $('[type="TASK_EDITOR"].__template__').html(
         </td>\
       </tr>\
       <tr>\
-        <td  colspan="2">\
+        <td  colspan="1">\
           <label for="status" class=" ">status</label><br>\
           <select id="status" name="status" class="taskStatus" status="(#=obj.status#)"  onchange="$(this).attr(\'STATUS\',$(this).val());">\
             <option value="STATUS_ACTIVE" class="taskStatus" status="STATUS_ACTIVE" >active</option>\
@@ -185,6 +234,18 @@ $('[type="TASK_EDITOR"].__template__').html(
           </select>\
         </td>\
 \
+        <td valign="top" nowrap>\
+          <label>type</label><br>\
+          <input type="text" name="type_txt" id="type_txt" size="4" class="formElements validated" autocomplete="off" maxlength="255" value="" oldvalue="" entrytype="">\
+        </td>\
+        <td valign="top" nowrap>\
+          <label>typeId</label><br>\
+          <input type="text" name="type" id="type" size="4" class="formElements validated" autocomplete="off" maxlength="255" value="" oldvalue="1" entrytype="INTEGER">\
+        </td>\
+        <td valign="top" nowrap>\
+          <label>relevance</label><br>\
+          <input type="text" name="relevance" id="relevance" size="4" class="formElements validated" autocomplete="off" maxlength="255" value="" oldvalue="1" entrytype="INTEGER">\
+        </td>\
         <td valign="top" nowrap>\
           <label>progress</label><br>\
           <input type="text" name="progress" id="progress" size="7" class="formElements validated percentile" autocomplete="off" maxlength="255" value="" oldvalue="1" entrytype="PERCENTILE">\
@@ -251,6 +312,29 @@ $('[type="RESOURCE_ROW"].__template__').html(
   </tr>\
   -->');
 
+$('[type="RESOURCE_DETAIL_EDITOR"].__template__').html(
+'<!--\
+  <div class="resourceEditor" style="padding: 5px;">\
+\
+    <h2>Resource Editor</h2>\
+    <table cellspacing="1" cellpadding="5" width="100%" id="resourcesTable" class="table">\
+      <tr>\
+        <td valign="top" nowrap style="height:80px;width:400px">\
+          <label>name</label><br>\
+          <input type="text" name="name" id="name" size="7" class="formElements validated" autocomplete="off" maxlength="255" value="" oldvalue="" entrytype="">\
+        </td>\
+      </tr>\
+      <tr>\
+        <td valign="top" nowrap>\
+          <label>Standard Rate</label><br>\
+          <input type="text" name="rate" id="rate" size="7" class="formElements validated" autocomplete="off" maxlength="255" value="" oldvalue="1" entrytype="DOUBLE">\
+        </td>\
+      </tr>\
+    </table>\
+\
+    <div style="text-align: right; padding-top: 20px"><button id="resEditSaveButton" class="button big first" onClick="$(this).trigger(\'saveResEditor.gantt\');">Save</button></div>\
+  </div>\
+  -->');
 
 
   var canWrite=true; //this is the default for test purposes
@@ -294,12 +378,18 @@ function loadProject(){
       console.log("error!!!"+textStatus);
     },
     success: function(project) {
-      if (!project.canWrite)
-        $(".ganttButtonBar button.requireWrite").attr("disabled","true");
-
-      ge.loadProject(project);
-      ge.checkpoint(); //empty the undo stack
-
+      // if (project && project.tasks.length > 0) {
+      if (project) {
+        if (!project.canWrite)
+          $(".ganttButtonBar button.requireWrite").attr("disabled","true");
+        ge.loadProject(project);
+        ge.checkpoint(); //empty the undo stack
+      }
+      else {
+        newProject();
+      }
+      localStorage.setObject("TWPGanttGridState", null);//so that previous project's header widths dont affect this project's one
+      localStorage.setObject("TWPGanttResState", null);
       saveInLocalStorage();//save this in browser's cache in case user tries to refresh page (faster loading)
     }
   });
@@ -405,17 +495,18 @@ function saveGanttOnServer() {
   
   var prj = ge.saveProject();
 
-  delete prj.resources;
+  //jkk we are now saving the resources delete prj.resources;
   delete prj.roles;
+console.log(prj.resources);
 
   // var prof = new Profiler("saveServerSide");
   // prof.reset();
 
-  if (ge.deletedTaskIds.length>0) {
-    if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length)) {
-      return;
-    }
-  }
+  //jkk removed alert box if (ge.deletedTaskIds.length>0) {
+  //   if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length)) {
+  //     return;
+  //   }
+  // }
 
   $.ajax("/gantt/saveProjectTasks", {
     dataType:"json",
@@ -576,11 +667,39 @@ function editResources(){
     ge.resources=newRes;
 
     closeBlackPopup();
+
+    //jkk update resource editor
+    ge.loadResTasks(ge.resources,ge.tasks);
+
     ge.redraw();
   });
 
 
   var ndo = createModalPopup(400, 500).append(resourceEditor);
+
+
+}
+
+function editDetailResources(){
+
+  if($(".gdfResTable").is(":visible")) {
+    //display task editor
+    $(".gdfWrapper").eq(0).removeClass("hide");
+    $(".gdfWrapper").eq(1).addClass("hide");
+    ge.setViewing(0);
+    $(".toggleEditor").attr("title","resource view");
+    $(".toggleEditor .teamworkIcon").html("M");//resource icon @see icons.svg
+    $(".taskEditOnly").removeClass("disabled");
+  }
+  else {
+    //display resource editor
+    $(".gdfWrapper").eq(0).addClass("hide");
+    $(".gdfWrapper").eq(1).removeClass("hide");
+    ge.setViewing(1);
+    $(".toggleEditor").attr("title","task view");
+    $(".toggleEditor .teamworkIcon").html("t");//task icon @see icons.svg
+    $(".taskEditOnly").addClass("disabled");
+  }
 }
 
 function initializeHistoryManagement(){
@@ -693,7 +812,10 @@ function showBaselineInfo (event,element){
 }
 
   $.JST.loadDecorator("RESOURCE_ROW", function(resTr, res){
-    resTr.find(".delRes").click(function(){$(this).closest("tr").remove()});
+    resTr.find(".delRes").click(function(e){
+      $(this).closest("tr").remove();
+      return false;//prevent dialog box from closing after pressing trashcan icon
+    });
   });
 
   $.JST.loadDecorator("ASSIGNMENT_ROW", function(assigTr, taskAssig){

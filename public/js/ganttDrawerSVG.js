@@ -328,6 +328,8 @@ Ganttalendar.prototype.drawTask = function (task) {
           self.master.beginTransaction();
           self.master.changeTaskDates(task, new Date(st), new Date(en));
           self.master.endTransaction();
+          // //jkk added
+          // self.master.loadResTasks(self.master.resources,self.master.tasks);
         }
       });
 
@@ -710,7 +712,10 @@ Ganttalendar.prototype.redrawTasks = function (drawAll) {
   //console.debug("redrawTasks ");
   var self=this;
   //var prof = new Profiler("ganttRedrawTasks");
-
+  if (this.master.viewing==1) { //jkk added
+    $(".gdfWrapper").eq(0).removeClass("hide");
+    $(".gdfWrapper").eq(1).addClass("hide");
+  }
   self.element.find("table.ganttTable").height(self.master.editor.element.height());
 
   var collapsedDescendant = this.master.getCollapsedDescendant();
@@ -747,7 +752,10 @@ Ganttalendar.prototype.redrawTasks = function (drawAll) {
     self.svg.line(gridGroup, x, 0, x, "100%", {class: "ganttTodaySVG"});
   }
 
-
+  if (this.master.viewing==1) { //jkk added
+    $(".gdfWrapper").eq(0).addClass("hide");
+    $(".gdfWrapper").eq(1).removeClass("hide");
+  }
   //prof.stop();
 };
 

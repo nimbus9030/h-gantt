@@ -12,22 +12,30 @@ class ResourcesTableSeeder extends Seeder
     public function run()
     {
 	    $resource = array(
-	      'name' => 'User 1'
+	      'name' => 'User 1',
+	      'created_at' => DB::raw('NOW()'),
+	      'updated_at' => DB::raw('NOW()'),
 	  	);
 
 	     DB::table('resources')->insert($resource);
  	    $resource = array(
-	      'name' => 'User 2'
+	      'name' => 'User 2',
+	      'created_at' => DB::raw('NOW()'),
+	      'updated_at' => DB::raw('NOW()'),
 	  	);
 
 	     DB::table('resources')->insert($resource);
  	    $resource = array(
-	      'name' => 'User 3'
+	      'name' => 'User 3',
+	      'created_at' => DB::raw('NOW()'),
+	      'updated_at' => DB::raw('NOW()'),
 	  	);
 
 	     DB::table('resources')->insert($resource);
  	    $resource = array(
-	      'name' => 'User 4'
+	      'name' => 'User 4',
+	      'created_at' => DB::raw('NOW()'),
+	      'updated_at' => DB::raw('NOW()'),
 	  	);
 
 	     DB::table('resources')->insert($resource);
