@@ -209,7 +209,7 @@ class TasksTableSeeder extends Seeder
    	     'project_id' => 1,
 	      'name' => 'My Task 5',
 	      'progress' => 0,
-	      'progress_by_Worklog' => false, //this means that user can/can't change the progress %
+	      'progress_by_worklog' => false, //this means that user can/can't change the progress %
 	      'relevance' => 0,//this probably the paid version. This might mean the importance/priority of the task
 	      'type' => "",//this is also used by the paid version. We can use as 'type' of task?
 	      'type_id' => 0,//this is also used by the paid version. We can use as 'type' of task?
