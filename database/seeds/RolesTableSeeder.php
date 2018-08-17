@@ -20,7 +20,7 @@ class RolesTableSeeder extends Seeder
 	     DB::table('roles')->insert($role);
 
  	    $role = array(
-	      'name' => 'Worker'
+	      'name' => 'Worker',
 	      'created_at' => DB::raw('NOW()'),
 	      'updated_at' => DB::raw('NOW()'),
 	  	);
