@@ -46,6 +46,8 @@ class HomeController extends Controller
         );
 
         $project = new Project;
+        $user = \Auth::user();
+        $params["userId"] = $user->id;
         $response = $project->addToDatabase($params);
 
         return $response;
@@ -82,11 +84,12 @@ class HomeController extends Controller
         $dataTableHeaderNames = array("name","description","status","id");
         //convert column # to the table's column name
         $params["iSortCol_0"] = $dataTableHeaderNames[$params["iSortCol_0"]];
-
+        $user = \Auth::user();
+        $params["userId"] = $user["id"];
         $result = Project::getlist($params);
         if(!empty($result)) {
             foreach($result["data"] as $r) {
-                $rows[] = array($r["name"],$r["description"],$r["status"],0,$r["id"]); //0 = actions column
+                $rows[] = array($r["name"],$r["description"],$r["owner"],$r["status"],0,$r["id"]); //0 = actions column
             }
             $maxRows = $result["total"];
         }

@@ -12,7 +12,8 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+	$version = "v2018.8.22.1142";
+    return view('welcome',compact('version'));
 });
 
 Auth::routes();
@@ -26,4 +27,6 @@ Route::get('/gantt/{project}', 'GanttController@index');
 
 Route::post('/gantt/getProjectTasks', 'GanttController@getProjectTasks');
 Route::post('/gantt/saveProjectTasks', 'GanttController@saveProjectTasks');
+Route::post('/gantt/inviteUser', 'GanttController@inviteUser');
+Route::post('/gantt/getInviteUsers', 'GanttController@getInviteUsers');
 

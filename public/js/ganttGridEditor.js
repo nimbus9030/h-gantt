@@ -669,7 +669,8 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
         totalEffort += effort;
 
         //check if the selected resource exists in ganttMaster.resources
-        var res= self.master.getOrCreateResource(resId,resName);
+        // var res= self.master.getOrCreateResource(resId,resName,resUserId);
+        var res= self.master.getResource(resId);//jkk changed
 
         //if resource is not found nor created
         if (!res)

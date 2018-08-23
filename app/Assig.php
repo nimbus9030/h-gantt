@@ -28,10 +28,6 @@ class Assig extends Model
 			DB::beginTransaction();
 			$bError = false;
 			$oldAssignments = self::getAssignments(array("id"=>$taskId));
-// echo "<pre>";
-// var_dump($taskId);
-// var_dump($oldAssignments);
-// var_dump($assignArray);
 
 			//Jquery Gantt won't include an assignment if has been deleted by the user
 			//To handle this situation, we have to get the current assignment(s) and then determine
@@ -76,8 +72,6 @@ class Assig extends Model
 			}
 			if (!$bError) {
 				//The remaining assignments in $oldAssignments as assumed to be deleted by ganttEditor
-// var_dump("deleting time");
-// var_dump($oldAssignments);
 				foreach($oldAssignments as $deleteAssign) {
 					//existing record
 					$result = $this->where([

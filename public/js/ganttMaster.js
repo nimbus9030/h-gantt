@@ -46,6 +46,7 @@ function GanttMaster() {
 
 
   this.resources; //list of resources
+  // this.newResources; //list of resources jkk added
   this.roles;  //list of roles
 
   this.minEditableDate = 0;
@@ -320,16 +321,16 @@ GanttMaster.prototype.createTask = function (id, name, code, level, start, durat
 };
 
 
-GanttMaster.prototype.getOrCreateResource = function (id, name) {
+GanttMaster.prototype.getOrCreateResource = function (id, name, userId) {
   var res= this.getResource(id);
-  if (!res && id && name) {
-    res = this.createResource(id, name);
+  if (!res && id && name && userId) {
+    res = this.createResource(id, name, userId);
   }
   return res
 };
 
-GanttMaster.prototype.createResource = function (id, name) {
-  var res = new Resource(id, name);
+GanttMaster.prototype.createResource = function (id, name, userId) {
+  var res = new Resource(id, name, userId);
   this.resources.push(res);
   return res;
 };
@@ -524,6 +525,7 @@ GanttMaster.prototype.loadProject = function (project) {
   this.beginTransaction();
   this.serverClientTimeOffset = typeof project.serverTimeOffset !="undefined"? (parseInt(project.serverTimeOffset) + new Date().getTimezoneOffset() * 60000) : 0;
   this.resources = project.resources;
+  // this.newResources = project.newResources;
   this.roles = project.roles;
 
   //permissions from loaded project
@@ -581,7 +583,6 @@ GanttMaster.prototype.loadProject = function (project) {
   this.gantt.element.oneTime(200, function () {self.gantt.centerOnToday()});
 };
 
-
 GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
   //console.debug("GanttMaster.prototype.loadTasks")
   //var prof=new Profiler("ganttMaster.loadTasks");
@@ -606,10 +607,7 @@ GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
     }
   }
   else {
-    //for new projects, always create a root row, which can never be deleted. This will be the "project row"
-    var ch = factory.build("tmp_fk" + new Date().getTime()+"_"+1, "Project Root", "", 0, new Date().getTime(), Date.workingPeriodResolution);
-    ch.master = this; // in order to access controller from task
-    this.tasks.push(ch);  //append task at the end
+    this.initTasks();
   }
 
   for (var i = 0; i < this.tasks.length; i++) {
@@ -661,7 +659,6 @@ GanttMaster.prototype.loadResTasks = function (resources,tasks) {
   //jkk loadTasks already does this this.reset();
   this.resTasks = [];
   this.resEditor.reset();
-   console.log(this.tasks);
   for (var i = 0; i < resources.length; i++) {
     var restask = resources[i];
     if (!(restask instanceof ResTask)) {
@@ -932,6 +929,7 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
 
   if (!forTransaction) {
     ret.resources = this.resources;
+    // ret.newResources = this.newResources;
     ret.roles = this.roles;
     ret.canWrite = this.permissions.canWrite;
     ret.canWriteOnParent = this.permissions.canWriteOnParent;
@@ -2122,3 +2120,15 @@ GanttMaster.prototype.deleteCurrentResTask = function (taskId) {
     self.endTransaction();
   }
 };
+//for new projects, always create the first row
+GanttMaster.prototype.initTasks = function () {
+  var factory = new TaskFactory();
+    //for new projects, always create a root row, which can never be deleted. This will be the "project row"
+  var ch = factory.build("tmp_fk" + new Date().getTime()+"_"+1, "Project Root", "", 0, new Date().getTime(), Date.workingPeriodResolution);
+  ch.master = this; // in order to access controller from task
+  this.tasks.push(ch);  //append task at the end
+  //append task to editor
+  this.editor.addTask(ch, null, true);
+  //append task to gantt
+  this.gantt.addTask(ch);
+}

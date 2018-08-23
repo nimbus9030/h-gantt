@@ -8,9 +8,12 @@ use \App\Project;
 use \App\Task;
 use \App\Resource;
 use \App\Role;
-
+use \App\User;
 use Log;
 use Validator;
+use Session;
+use Hash;
+use DB;
 
 class GanttController extends Controller
 {
@@ -25,12 +28,72 @@ class GanttController extends Controller
     }
 
     /**
+      Checks access/permissions
+      @params string $varName
+      $varName is the variable name of the permission. i.e. "canWrite"
+    */
+    private function checkAccess($varName) {
+      $project = Session::get('project');
+      $user = \Auth::user();
+      
+      if ($varName === "canLoadProject") {
+        //If user is the owner, access is allowed for everything
+        if ($project->owner == $user->id) return true;
+        $resources = Session::put('resources');
+        foreach($resources as $res) {
+          if ($res["user_id"] == $user->id) {
+            return true;
+          }
+        }
+      }
+      else if ($varName === "canSaveProject") {
+        //If user is the owner, access is allowed for everything
+        if ($project->owner == $user->id) return true;
+      }
+      else if ($varName === "canViewResourceTable") {
+        //If user is the owner, access is allowed for everything
+        if ($project->owner == $user->id) return true;
+      }
+      else if ($varName === "canInviteUser") {
+        //If user is the owner, access is allowed for everything
+        if ($project->owner == $user->id) return true;
+      }
+
+      return false;
+    }
+    /**
      * Show the application dashboard.
      *
      * @return \Illuminate\Http\Response
      */
     public function index(Project $project)
     {
+      Session::put('project', $project);
+      $resources = new Resource();
+
+      $result = $this->checkAccess("canLoadProject");
+      if ($result === false) {
+        return redirect('/home');
+      }
+
+      try {
+        $result = $resources->getAllResources($project->id);
+        if ($result) {
+          Session::put('resources', $result);
+        }
+        else {
+          Session::put('resources', array());
+        }
+      }
+      catch(\Illuminate\Database\QueryException $ex) {
+        Session::put('resources', array());
+      }
+
+      //verify that the user really has access to at least view this project, otherwise send user back to 'home' screen
+      $result = $this->checkAccess("canLoadProject");
+      if ($result === false) {
+        return redirect('/home');
+      }
 
       $templates = $this->getTemplates();
     	return view('gantt',compact('project','templates'));
@@ -345,7 +408,8 @@ EOF;
 
       $request->validate($rules);
       $tasks = Task::getTasks(array("id" => $request->input("id")));
-      $resources = Resource::getAllResources();
+      $resources = Session::get('resources');
+      // $newResources = Session::get('newResources');
       $roles = Role::getAllRoles();
 
       $ganttData = array(
@@ -354,26 +418,37 @@ EOF;
         'deletedTaskIds' => array(),
         'resources' => $resources,
         'roles' => $roles,
-        'canWrite' => true,
-        'canDelete' => true,
-        'canWriteOnParent' => true,
-        'canAdd' => true,
+        // 'canWrite' => true,
+        // 'canDelete' => true,
+        // 'canWriteOnParent' => true,
+        // 'canAdd' => true,
         'zoom' => "1M"
       );
+      $ganttData["canAdd"] =
+      $ganttData["canWriteOnParent"] = 
+      $ganttData["canDelete"] = 
+      $ganttData["canWrite"] = $this->checkAccess("canSaveProject");
+
       return $ganttData;
     }
     public function saveProjectTasks(Request $request) {
 
       $response = array("stat" => false, "error" => "");
 
+      $result = $this->checkAccess("canSaveProject");
+      if ($result === false) {
+        $response["error"] = "Access denied.";
+        return $response;
+      }
+
       $rules = [
         'GM' => 'string',
-        'project_id' => 'required|integer',
+        // 'project_id' => 'required|integer',
         'prj' => 'required|string',
       ];
 
       $request->validate($rules);
-
+      
 
       $data = $request->input('prj');
       $data = json_decode($data,true);
@@ -418,15 +493,96 @@ EOF;
       }
       else {
         $task = new Task;
-        $task->project_id = $request->input('project_id');
+        $task->setProjectId(Session::get('project')->id);
         $response = $task->saveMultiple($data);
         if ($response["stat"]) {
           $resource = new Resource;
+          $user = \Auth::user();
+          $resource->setUserId($user->id);
+          $resource->setProjectId(Session::get('project')->id);
           $response = $resource->saveMultiple($data["resources"]);
         }
       }
       return $response;
     }
+    public function inviteUser(Request $request) {
 
+      $result = $this->checkAccess("canInviteUser");
+      if ($result === false) {
+        $response["error"] = "Access denied.";
+        return $response;
+      }
+
+      $rules = [
+          'name'      => 'required|string',
+          'email'      => 'required|email',
+      ];
+      $request->validate($rules);
+      $response = array("stat" => false, "error" => "");
+      //Create a user account if it doesnt exist
+      $result = User::where('email','=',$request->input("email"))->get()->toArray();
+      if ($result && sizeof($result)>0) {
+        $response["error"] = "This user already exists!";
+        return $response;
+      }
+      $user = array(
+        'name' => $request->input("name"),
+        'email' => $request->input("email"),
+        'password' => Hash::make('hunglead'),//default invitation password is always 'hunglead'
+        'created_at' => DB::raw('NOW()'),
+        'updated_at' => DB::raw('NOW()'),
+      );
+      try {
+        $newId = DB::table('users')->insertGetId($user);
+        if (is_numeric($newId)) {
+          $response["stat"] = true;
+          $response["id"] = $newId;
+        }
+        else {
+          $response["error"] = "Insert failed!";
+        }
+      }
+      catch(\Illuminate\Database\QueryException $ex) {
+        $response["error"] = $ex->getMessage();
+      }
+
+      return $response;
+    }
+    /**
+      Get all users (resources) that are currently not assigned to this project. The owner of this project
+      is not included in the list. This list is displayed in the Project Team modal box under "Invite Person"
+
+    */
+    public function getInviteUsers(Request $request) {
+      $response = array("stat" => false, "error" => "");
+
+      $result = $this->checkAccess("canViewResourceTable");
+      if ($result === false) {
+        $response["error"] = "Access denied.";
+        return $response;
+      }
+
+      $resource = new Resource;
+      try {
+        $result = $resource->getAvailableResources(Session::get('project')->id);
+        if($result) {
+          $response["stat"] = true;
+          $response["resources"] = $result;
+        }
+        else {
+          //there are no users that are not a part of this project
+          $response["stat"] = true;
+          $response["resources"] = array();
+        }
+      }
+      catch(\Illuminate\Database\QueryException $ex) {
+        $response["error"] = $ex->getMessage();
+      }
+      catch(Exception $ex) {
+        $response["error"] = $ex->getMessage();
+      }
+
+      return $response;
+    }
 
 }

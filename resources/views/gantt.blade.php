@@ -305,7 +305,8 @@ cc{!! $templates["GANTBUTTONS"] !!}dd --}}
     <td align="center"><span class="teamworkIcon delRes del" style="cursor: pointer">d</span></td>
   </tr>
   --></div>
-
+<div class="__template__" type="ADDUSER_ROW">
+</div>
 <div class="__template__" type="RESOURCE_DETAIL_EDITOR">
 </div>
 

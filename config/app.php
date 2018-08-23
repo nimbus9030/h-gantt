@@ -229,7 +229,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
-
+        'User' => App\User::class,
         'Project' => App\Project::class,
         'Task' => App\Task::class,
         'Resource' => App\Resource::class,

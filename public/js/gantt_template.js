@@ -45,14 +45,14 @@ $(function() {
       <button onclick="$(\'#workSpace\').trigger(\'fullScreen.gantt\');return false;" class="button textual icon" title="FULLSCREEN" id="fullscrbtn"><span class="teamworkIcon">@</span></button>\
       <button onclick="ge.element.toggleClass(\'colorByStatus\' );return false;" class="button textual icon"><span class="teamworkIcon">&sect;</span></button>\
 \
-    <button onclick="editResources();" class="button textual requireWrite" title="edit resources"><span class="teamworkIcon">M</span></button>\
+    <button onclick="getInviteUsers();" class="button textual requireWrite" title="edit resources"><span class="teamworkIcon">M</span></button>\
       &nbsp; &nbsp; &nbsp; &nbsp;\
     <button onclick="saveGanttOnServer();" class="button first big requireWrite" title="Save">Save</button>\
     <button onclick="newProject();" class="button requireWrite newproject"><em>clear project</em></button>\
     <button class="button login" title="login/enroll" onclick="loginEnroll($(this));" style="display:none;">login/enroll</button>\
     <button class="button opt collab" title="Start with Twproject" onclick="collaborate($(this));" style="display:none;"><em>collaborate</em></button>\
     <span class="ganttButtonSeparator requireCanSeeCriticalPath"></span>\
-    <button onclick="editDetailResources();" class="button textual requireWrite toggleEditor" title="resource view"><span class="teamworkIcon">M</span></button>\
+    <button onclick="editDetailResources();" class="button textual requireWrite toggleEditor" title="resource view"><span class="teamworkIcon">=</span></button>\
     </div></div>\
 -->');
 
@@ -63,12 +63,12 @@ $('[type="TASKSEDITHEAD"].__template__').html(
     <tr style="height:40px">\
       <th class="gdfColHeader" style="width:35px; border-right: none"></th>\
       <th class="gdfColHeader" style="width:25px;"></th>\
-      <th class="gdfColHeader gdfResizable" style="width:100px;">code/short name</th>\
+      <th class="gdfColHeader gdfResizable" style="width:140px;">nickname</th>\
       <th class="gdfColHeader gdfResizable" style="width:300px;">name</th>\
       <th class="gdfColHeader"  align="center" style="width:17px;" title="Start date is a milestone."><span class="teamworkIcon" style="font-size: 8px;">^</span></th>\
       <th class="gdfColHeader gdfResizable" style="width:80px;">start</th>\
       <th class="gdfColHeader"  align="center" style="width:17px;" title="End date is a milestone."><span class="teamworkIcon" style="font-size: 8px;">^</span></th>\
-      <th class="gdfColHeader gdfResizable" style="width:80px;">End</th>\
+      <th class="gdfColHeader gdfResizable" style="width:80px;">end</th>\
       <th class="gdfColHeader gdfResizable" style="width:50px;">dur.</th>\
       <th class="gdfColHeader gdfResizable" style="width:20px;">%</th>\
       <th class="gdfColHeader gdfResizable requireCanSeeDep" style="width:50px;">depe.</th>\
@@ -126,7 +126,7 @@ $('[type="TASKSEDITRESOURCEHEAD"].__template__').html(
     <tr style="height:40px">\
       <th class="gdfColHeader" style="width:35px; border-right: none"></th>\
       <th class="gdfColHeader" style="width:25px;"></th>\
-      <th class="gdfColHeader gdfResizable" style="width:400px;">name</th>\
+      <th class="gdfColHeader gdfResizable" style="width:300px;">Team Members</th>\
       <th class="gdfColHeader gdfResizable" style="width:100px;">Task Cost</th>\
       <th class="gdfColHeader gdfResizable" style="width:100px;">Standard Rate</th>\
       <th class="gdfColHeader gdfResizable" style="width:80px;">Work Days</th>\
@@ -203,7 +203,7 @@ $('[type="TASK_EDITOR"].__template__').html(
           <label for="code">code/short name</label><br>\
           <input type="text" name="code" id="code" value="" size=15 class="formElements" autocomplete=\'off\' maxlength=255 style=\'width:100%\' oldvalue="1">\
         </td>\
-        <td colspan="3" valign="top"><label for="name" class="required">name</label><br><input type="text" name="name" id="name"class="formElements" autocomplete=\'off\' maxlength=255 style=\'width:100%\' value="" required="true" oldvalue="1"></td>\
+        <td colspan="3" valign="top"><label for="name" class="required">name</label><br><input type="text" name="name" id="name" class="formElements" autocomplete=\'off\' maxlength=255 style=\'width:100%\' value="" required="true" oldvalue="1"></td>\
           </tr>\
       <tr class="dateRow">\
         <td nowrap="">\
@@ -302,16 +302,43 @@ $('[type="RESOURCE_EDITOR"].__template__').html(
         <th style="width:30px;" id="addResource"><span class="teamworkIcon" style="cursor: pointer">+</span></th>\
       </tr>\
     </table>\
-\
-    <div style="text-align: right; padding-top: 20px"><button id="resSaveButton" class="button big">Save</button></div>\
+    <div style="text-align: right; padding-top: 20px"><button id="resSaveButton" class="button big">Save Project Team</button></div>\
+    <h2>Add User</h2>\
+    <table cellspacing="1" cellpadding="0" width="100%" id="inviteTable">\
+      <tr>\
+        <th style="width:100px;">name</th>\
+        <th style="width:30px">Add User</th>\
+      </tr>\
+    </table>\
+    <p></p>\
+    <h2>Invite User</h2>\
+    <table cellspacing="1" cellpadding="0" width="100%">\
+      <tr>\
+        <td width="100" style="height: 40px"  valign="top">\
+          <label for="code">User name</label><br>\
+          <input type="text" id="inviteName" value="" size=15 class="formElements" autocomplete=\'off\' maxlength=255 style=\'width:100%\' oldvalue="">\
+        </td>\
+        <td colspan="3" valign="top"><label for="email" class="required">email</label><br><input type="email" id="inviteEmail" class="formElements" autocomplete=\'off\' maxlength=255 style=\'width:100%\' value="" required="true" oldvalue=""></td>\
+      </tr>\
+    </table>\
+    <div style="text-align: right; padding-top: 20px"><button id="inviteButton" class="button big">Invite</button></div>\
   </div>\
   -->');
 
 $('[type="RESOURCE_ROW"].__template__').html(
 '<!--\
   <tr resId="(#=obj.id#)" class="resRow" >\
+    <input name="userId" type="hidden" value="(#=obj.userId#)">\
     <td ><input type="text" name="name" value="(#=obj.name#)" style="width:100%;" class="formElements"></td>\
     <td align="center"><span class="teamworkIcon delRes del" style="cursor: pointer">d</span></td>\
+  </tr>\
+  -->');
+
+$('[type="ADDUSER_ROW"].__template__').html(
+'<!--\
+  <tr resId="(#=obj.id#)" class="resRow" >\
+    <td ><input type="text" name="name" value="(#=obj.name#)" style="width:100%;" class="formElements"></td>\
+    <td align="center"><span class="teamworkIcon addUserRes" style="cursor: pointer">r</span></td>\
   </tr>\
   -->');
 
@@ -340,7 +367,7 @@ $('[type="RESOURCE_DETAIL_EDITOR"].__template__').html(
   -->');
 
 
-  var canWrite=true; //this is the default for test purposes
+  // var canWrite=true; //this is the default for test purposes
 
   // here starts gantt initialization
   ge = new GanttMaster();
@@ -396,63 +423,6 @@ function loadProject(){
       saveInLocalStorage();//save this in browser's cache in case user tries to refresh page (faster loading)
     }
   });
-
-
-  //console.debug("getDemoProject")
-// ret= {"tasks":    [
-//       {"id": -1, "name": "Gantt editor", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 0, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 20, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-//       {"id": -2, "name": "coding", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 10, "end": 1398203999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-//       {"id": -3, "name": "gantt part", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 2, "end": 1397167199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-//       {"id": -4, "name": "editor part", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "3", "canWrite": true, "start": 1397167200000, "duration": 4, "end": 1397685599999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-//       {"id": -5, "name": "testing", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_SUSPENDED", "depends": "2:5", "canWrite": true, "start": 1398981600000, "duration": 5, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-//       {"id": -6, "name": "test on safari", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "", "canWrite": true, "start": 1398981600000, "duration": 2, "end": 1399327199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-//       {"id": -7, "name": "test on ie", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 3, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-//       {"id": -8, "name": "test on chrome", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 2, "end": 1399499999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false}
-//     ], "selectedRow": 2, "deletedTaskIds": [],
-//       "resources": [
-//       {"id": "tmp_1", "name": "Resource 1"},
-//       {"id": "tmp_2", "name": "Resource 2"},
-//       {"id": "tmp_3", "name": "Resource 3"},
-//       {"id": "tmp_4", "name": "Resource 4"}
-//     ],
-//       "roles":       [
-//       {"id": "tmp_1", "name": "Project Manager"},
-//       {"id": "tmp_2", "name": "Worker"},
-//       {"id": "tmp_3", "name": "Stakeholder"},
-//       {"id": "tmp_4", "name": "Customer"}
-//     ], "canWrite":    true, "canDelete":true, "canWriteOnParent": true, canAdd:true}
-
-
-// ret= {"tasks":    [
-//       {"id": -1, "name": "Gantt editor", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 0, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 20, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-//       {"id": -2, "name": "coding", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 10, "end": 1398203999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-//       {"id": -3, "name": "gantt part", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 2, "end": 1397167199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-//       {"id": -4, "name": "editor part", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "3", "canWrite": true, "start": 1397167200000, "duration": 4, "end": 1397685599999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-//       {"id": -5, "name": "testing", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_SUSPENDED", "depends": "2:5", "canWrite": true, "start": 1398981600000, "duration": 5, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-//       {"id": -6, "name": "test on safari", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "", "canWrite": true, "start": 1398981600000, "duration": 2, "end": 1399327199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-//       {"id": -7, "name": "test on ie", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 3, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-//       {"id": -8, "name": "test on chrome", "progress": 0, "progressByWorklog": true, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 2, "end": 1399499999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false}
-//     ], "selectedRow": 2, "deletedTaskIds": [],
-//       "resources": [
-//       {"id": 1, "name": "Resource 1"},
-//       {"id": 2, "name": "Resource 2"},
-//       {"id": 3, "name": "Resource 3"},
-//       {"id": 4, "name": "Resource 4"}
-//     ],
-//       "roles":       [
-//       {"id": 1, "name": "Project Manager"},
-//       {"id": 2, "name": "Worker"},
-//       {"id": 3, "name": "Stakeholder"},
-//       {"id": 4, "name": "Customer"}
-//     ], "canWrite":    true, "canDelete":true, "canWriteOnParent": true, canAdd:true}
-
-//     //actualize data
-//     var offset=new Date().getTime()-ret.tasks[0].start;
-//     for (var i=0;i<ret.tasks.length;i++) {
-//       ret.tasks[i].start = ret.tasks[i].start + offset;
-//     }
-//   return ret;
-
 
 }
 
@@ -520,15 +490,11 @@ console.log(prj.resources);
     },
     type:"POST",
     error: function(jqXHR, textStatus, errorThrown) {
-
+      displayToast(errorThrown,"rgb(153,0,0)");
     },
     success: function(response) {
       if (!response["stat"]) {
-        var errorMsg = "";
-        for(obj in response["error"]) {
-          errorMsg += response["error"][obj] + "<br>";
-        }
-        displayToast(errorMsg,"rgb(153,0,0)");
+        displayToast(response["error"],"rgb(153,0,0)");
       }
       else {
         //if new task(s) were added, rename the temporary id name with the database's task.id
@@ -566,6 +532,8 @@ function newProject(){
 
 function clearGantt() {
   ge.reset();
+  ge.initTasks();
+  ge.redraw();
 }
 
 //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
@@ -610,9 +578,8 @@ function saveInLocalStorage() {
   }
 }
 
-
 //-------------------------------------------  Open a black popup for managing resources. This is only an axample of implementation (usually resources come from server) ------------------------------------------------------
-function editResources(){
+function editResources(newResArray){
 
   //make resource editor
   var resourceEditor = $.JST.createFromTemplate({}, "RESOURCE_EDITOR");
@@ -625,24 +592,39 @@ function editResources(){
 
 
   //bind add resource
-  resourceEditor.find("#addResource").click(function(){
-    resTbl.append($.JST.createFromTemplate({id:"new",name:"resource"}, "RESOURCE_ROW"))
-  });
+  //jkk resourceEditor.find("#addResource").click(function(){
+  //   resTbl.append($.JST.createFromTemplate({id:"new",name:"resource"}, "RESOURCE_ROW"))
+  // });
+
+  //append invite users
+  var inviteTbl=resourceEditor.find("#inviteTable");
+  for (var i=0;i<newResArray.length;i++){
+    var res=newResArray[i];
+    inviteTbl.append($.JST.createFromTemplate(res, "ADDUSER_ROW"))
+  }
+  // for (var i=0;i<ge.newResources.length;i++){
+  //   var res=ge.newResources[i];
+  //   inviteTbl.append($.JST.createFromTemplate(res, "ADDUSER_ROW"))
+  // }
 
   //bind save event
   resourceEditor.find("#resSaveButton").click(function(){
     var newRes=[];
+    var bSaveRequired = false;
     //find for deleted res
     for (var i=0;i<ge.resources.length;i++){
       var res=ge.resources[i];
       var row = resourceEditor.find("[resId="+res.id+"]");
       if (row.length>0){
         //if still there save it
-        var name = row.find("input[name]").val();
+        var name = row.find('input[name="name"]').val();
         if (name && name!="")
           res.name=name;
+        else
+          bSaveRequired = true;
         newRes.push(res);
       } else {
+        bSaveRequired = true;
         //remove assignments
         for (var j=0;j<ge.tasks.length;j++){
           var task=ge.tasks[j];
@@ -662,21 +644,53 @@ function editResources(){
     resourceEditor.find("[resId=new]").each(function(){
       cnt++;
       var row = $(this);
-      var name = row.find("input[name]").val();
-      if (name && name!="")
-        newRes.push (new Resource("tmp_"+new Date().getTime()+"_"+cnt,name));
+      var name = row.find('input[name="name"]').val();
+      var userId = row.find('input[name="userId"]').val();
+      if (name && name!="") {
+        newRes.push (new Resource("tmp_"+new Date().getTime()+"_"+cnt,name,userId));
+        bSaveRequired = true;
+      }
     });
 
     ge.resources=newRes;
 
-    closeBlackPopup();
+    // var newRes=[];
+    // //find any deleted "add user" resources (these a re in the invite person section)
+    // for (var i=0;i<ge.newResources.length;i++){
+    //   var res=ge.newResources[i];
+    //   var row = resourceEditor.find("[resId="+res.id+"]");
+    //   if (row.length>0){
+    //     //if still there save it
+    //     var name = row.find('input[name="name"]').val();
+    //     if (name && name!="")
+    //       res.name=name;
+    //     newRes.push(res);
+    //   } else {
+        
+    //   }
+    // }
 
+    // ge.newResources=newRes;
     //jkk update resource editor
     ge.loadResTasks(ge.resources,ge.tasks);
+    saveInLocalStorage();//jkk added to save any added user(s)
+
+    // if(bSaveRequired)
+    //     ge.saveRequired();
+
+    closeBlackPopup();
 
     ge.redraw();
   });
 
+  //bind invite event
+  resourceEditor.find("#inviteButton").click(function(){
+    console.log("invite!");
+    var name = resourceEditor.find("#inviteName").val();
+    var email = resourceEditor.find("#inviteEmail").val();
+    inviteUser(name,email);
+  });
+    
 
   var ndo = createModalPopup(400, 500).append(resourceEditor);
 
@@ -691,7 +705,7 @@ function editDetailResources(){
     $(".gdfWrapper").eq(1).addClass("hide");
     ge.setViewing(0);
     $(".toggleEditor").attr("title","resource view");
-    $(".toggleEditor .teamworkIcon").html("M");//resource icon @see icons.svg
+    $(".toggleEditor .teamworkIcon").html("=");//resource icon @see icons.svg
     $(".taskEditOnly").removeClass("disabled");
   }
   else {
@@ -851,6 +865,21 @@ function showBaselineInfo (event,element){
 
   });
 
+  $.JST.loadDecorator("ADDUSER_ROW", function(resTr, res){
+    resTr.find(".addUserRes").click(function(e){
+      $(this).closest("tr").remove();
+      var resTbl=$('#resourcesTable');
+      var newRes = {};
+      newRes.id = "new";
+      newRes.userId = res.id;//user's id
+      newRes.name = res.name;
+      newRes.access = 2;
+      newRes.rate = 0;
+      console.log(newRes);
+      resTbl.append($.JST.createFromTemplate(newRes, "RESOURCE_ROW"));
+      return false;//prevent dialog box from closing after pressing trashcan icon
+    });
+  });
 
   function loadI18n(){
     GanttMaster.messages = {
@@ -895,5 +924,84 @@ function showBaselineInfo (event,element){
         row.find("[name=resourceId_txt]").val(response.resName).focus().blur();
       }
 
+    });
+  }
+
+  function inviteUser(name,email){
+
+    $.ajax({
+      type: 'POST',
+      url: "/gantt/inviteUser",
+      async: true,
+      cache : false,
+      dataType : "json",
+      data:  {
+        '_token': $('meta[name="csrf-token"]').attr('content'),
+        'name' : name,
+        'email' : email
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          var errorMsg = "";
+          //Display Laravel Validation error(s) if any
+          if (typeof jqXHR.responseJSON != 'undefined') {
+              for(obj in jqXHR.responseJSON.errors) {
+                  for(var i = 0; i < jqXHR.responseJSON.errors[obj].length;i++) {
+                      errorMsg += jqXHR.responseJSON.errors[obj][i] + "<br>";
+                  }
+              }
+          }
+          else {
+              //display server error
+              errorMsg = errorThrown;
+          }
+          displayToast(errorMsg,"rgb(153,0,0)");
+      },
+      success: function(result) {
+        if (result["stat"]) {
+          // var resourceEditor = $.JST.createFromTemplate({}, "RESOURCE_EDITOR");
+          // var resTbl=resourceEditor.find("#resourcesTable");
+          // var res = {};
+          // res.id = result["id"];
+          // res.name = name;
+          // resTbl.append($.JST.createFromTemplate(res, "RESOURCE_ROW"))
+          var resTbl=$('#resourcesTable');
+          var newRes = {};
+          newRes.id = "new";
+          newRes.userId = result["id"];
+          newRes.name = name;
+          newRes.access = 2;
+          newRes.rate = 0;
+          resTbl.append($.JST.createFromTemplate(newRes, "RESOURCE_ROW"));
+          displayToast("User created!","rgb(0,153,0)");
+        }
+        else {
+          displayToast(result["error"],"rgb(153,0,0)");
+        }
+      }
+    });
+  }
+
+  function getInviteUsers(){
+
+    $.ajax({
+      type: 'POST',
+      url: "/gantt/getInviteUsers",
+      async: true,
+      cache : false,
+      dataType : "json",
+      data:  {
+        '_token': $('meta[name="csrf-token"]').attr('content'),
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          displayToast(errorThrown,"rgb(153,0,0)");
+      },
+      success: function(result) {
+        if (result["stat"]) {
+          editResources(result["resources"]);
+        }
+        else {
+          displayToast(result["error"],"rgb(153,0,0)");
+        }
+      }
     });
   }

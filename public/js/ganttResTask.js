@@ -1209,36 +1209,4 @@ ResTask.prototype.canStatusBeChangedTo=function(newStatus) {
 };
 
 
-//<%------------------------------------------------------------------------  LINKS OBJECT ---------------------------------------------------------------%>
-function Link(taskFrom, taskTo, lagInWorkingDays) {
-  this.from = taskFrom;
-  this.to = taskTo;
-  this.lag = lagInWorkingDays;
-}
-
-
-//<%------------------------------------------------------------------------  ASSIGNMENT ---------------------------------------------------------------%>
-function Assignment(id, resourceId, roleId, effort) {
-  this.id = id;
-  this.resourceId = resourceId;
-  this.roleId = roleId;
-  this.effort = effort;
-}
-
-
-//<%------------------------------------------------------------------------  RESOURCE ---------------------------------------------------------------%>
-function Resource(id, name) {
-  this.id = id;
-  this.name = name;
-}
-
-
-//<%------------------------------------------------------------------------  ROLE ---------------------------------------------------------------%>
-function Role(id, name) {
-  this.id = id;
-  this.name = name;
-}
-
-
-
 

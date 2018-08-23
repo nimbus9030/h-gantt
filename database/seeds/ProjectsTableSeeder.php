@@ -15,6 +15,7 @@ class ProjectsTableSeeder extends Seeder
 	      'name' => 'my project',
 	      'description' => 'test project',
 	      'status' => 1,
+	      'owner' => 1,
 	      'delete_flag' => false,
 	      'created_at' => DB::raw('NOW()'),
 	      'updated_at' => DB::raw('NOW()'),

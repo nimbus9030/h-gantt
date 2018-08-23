@@ -1218,10 +1218,12 @@ function Assignment(id, resourceId, roleId, effort) {
 
 
 //<%------------------------------------------------------------------------  RESOURCE ---------------------------------------------------------------%>
-function Resource(id, name) {
+function Resource(id, name, userId) {
   this.id = id;
   this.name = name;
   this.rate = 0;
+  this.access = 2;
+  this.userId = userId;
 }
 
 

@@ -11,34 +11,43 @@ class ResourcesTableSeeder extends Seeder
      */
     public function run()
     {
-	    $resource = array(
-	      'name' => 'User 1',
-	      'created_at' => DB::raw('NOW()'),
-	      'updated_at' => DB::raw('NOW()'),
-	  	);
+    	$resource = array(
+    		'project_id' => 1,
+    		'user_id' => 1,
+    		'access' => 1,
+    		'created_at' => DB::raw('NOW()'),
+    		'updated_at' => DB::raw('NOW()'),
+    	);
 
-	     DB::table('resources')->insert($resource);
- 	    $resource = array(
-	      'name' => 'User 2',
-	      'created_at' => DB::raw('NOW()'),
-	      'updated_at' => DB::raw('NOW()'),
-	  	);
+    	DB::table('resources')->insert($resource);
 
-	     DB::table('resources')->insert($resource);
- 	    $resource = array(
-	      'name' => 'User 3',
-	      'created_at' => DB::raw('NOW()'),
-	      'updated_at' => DB::raw('NOW()'),
-	  	);
+    	$resource = array(
+    		'project_id' => 1,
+    		'user_id' => 2,
+    		'access' => 2,
+    		'created_at' => DB::raw('NOW()'),
+    		'updated_at' => DB::raw('NOW()'),
+    	);
 
-	     DB::table('resources')->insert($resource);
- 	    $resource = array(
-	      'name' => 'User 4',
-	      'created_at' => DB::raw('NOW()'),
-	      'updated_at' => DB::raw('NOW()'),
-	  	);
+    	DB::table('resources')->insert($resource);
+    	$resource = array(
+    		'project_id' => 1,
+    		'user_id' => 3,
+    		'access' => 2,
+    		'created_at' => DB::raw('NOW()'),
+    		'updated_at' => DB::raw('NOW()'),
+    	);
 
-	     DB::table('resources')->insert($resource);
+    	DB::table('resources')->insert($resource);
+    	$resource = array(
+    		'project_id' => 1,
+    		'user_id' => 4,
+    		'access' => 2,
+    		'created_at' => DB::raw('NOW()'),
+    		'updated_at' => DB::raw('NOW()'),
+    	);
+
+    	DB::table('resources')->insert($resource);
 
     }
 }

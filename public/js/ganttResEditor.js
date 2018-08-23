@@ -51,6 +51,7 @@ GridResEditor.prototype.fillEmptyLines = function () {
       emptyRow.find(".requireCanSeeDep").hide();
 
     //click on empty row create a task and fill above
+/* jkk not allowing new ResTask to be created when user clicks on an empty row
     emptyRow.click(function (ev) {
       //console.debug("emptyRow.click")
       var emptyRow = $(this);
@@ -82,6 +83,7 @@ GridResEditor.prototype.fillEmptyLines = function () {
         lastTask.rowElement.find("[name=name]").focus();//focus to "name" input
       }
     });
+*/
     this.element.append(emptyRow);
   }
 };
@@ -287,7 +289,7 @@ console.log(self.master.currentResTask);
         }
       }
     });
-
+/* jkk no need to display the resource editor since user can edit name and standard rate on the table row
     taskRow.dblclick(function (ev) { //open editor only if no text has been selected
 
       if (window.getSelection().toString().trim()=="") {
@@ -309,7 +311,9 @@ console.log(self.master.currentResTask);
         }
       }
     });
+*/
   }
+
   //prof.stop();
 };
 
@@ -470,7 +474,7 @@ GridResEditor.prototype.bindRowInputEvents = function (task, taskRow) {
           }
         }
       } else if (field == "name") {
-        task[field] = el.val();
+        // jkk can't modify resource name because table.resources.name doesn't exist! task[field] = el.val();
       } else {
         el.val("");
       }

@@ -163,6 +163,7 @@ Storage.prototype.getObject = function(key) {
         "aoColumns": [
           { "sWidth": "150px", "className" : "desktop text-center vam" },//name
           { "sWidth": "250px", "className" : "desktop text-center vam" },//description
+          { "sWidth": "100px", "className" : "desktop text-center vam" },//access
           { "sWidth": "100px", "className" : "desktop text-center vam" },//status
           { "sWidth": "100px", "className" : "desktop text-center vam" },//action: edit/delete
           { "className" : "never"}
@@ -178,17 +179,27 @@ Storage.prototype.getObject = function(key) {
                    return data;
                }
            },
-           { "title": "status","class": "fixed100", "targets": 2,
+            { "title": "access","class": "fixed100", "targets": 2,
+               "render": function ( data, type, row, meta ) {
+                    if(data == 1) {
+                        return '<span class="label label-success">Owner</span>';
+                    }
+                    else {
+                        return '<span class="label label-warning">Member</span>';
+                    }
+               }
+           },
+           { "title": "status","class": "fixed100", "targets": 3,
                "render": function ( data, type, row, meta ) {
                    return data;
                }
            },
-           { "title": "actions","class": "fixed100", "targets": 3,
+           { "title": "actions","class": "fixed100", "bSortable" : false,"targets": 4,
                "render": function ( data, type, row, meta ) {
                    return '<span class="fa fa-edit mr10 btn-edit"></span><span class="fa fa-trash-alt red btn-delete"></span>';
                }
            },
-           {    "class": "hidden", "targets": 4}, {{-- id --}}
+           {    "class": "hidden", "targets": 5}, {{-- id --}}
         ]
     });
 
@@ -196,10 +207,10 @@ Storage.prototype.getObject = function(key) {
     $('body').on('click',"#projectTable tbody td",function(e) {
         var tr = $(this).closest("tr");
         var rowdata = projectTable.row( tr ).data();
-        var id = rowdata[4];
+        var id = rowdata[5];
         var colIdx = projectTable.cell( this ).index().column;
         //skip if user pressed an action icon
-        if (colIdx < 3) {
+        if (colIdx < 4) {
             //remove cached project in browser
             if (localStorage) {
                 if (localStorage.getObject("teamworkGantDemo")) {
@@ -212,6 +223,7 @@ Storage.prototype.getObject = function(key) {
 
     //show add project modal
     $('#btn-showAddProjectModal').on('click',function(e) {
+        $('#addProjectModal .modal-title').html("Add a new project");
         $('#addProjectModal input[name="id"]').val(0);
         $('#addProjectModal input[name="name"]').val("");
         $('#addProjectModal input[name="description"]').val("");
@@ -266,6 +278,7 @@ Storage.prototype.getObject = function(key) {
     $('body').on('click','.btn-edit',function(e) {
         var tr = $(this).closest("tr");
         var rowdata = projectTable.row( tr ).data();
+        $('#addProjectModal .modal-title').html("Edit project");
         $('#addProjectModal input[name="id"]').val(rowdata[4]);
         $('#addProjectModal input[name="name"]').val(rowdata[0]);
         $('#addProjectModal input[name="description"]').val(rowdata[1]);

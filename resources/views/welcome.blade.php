@@ -49,7 +49,7 @@
                 font-size: 84px;
             }
 
-            .links > a {
+            .links > a,.version {
                 color: #636b6f;
                 padding: 0 25px;
                 font-size: 12px;
@@ -58,10 +58,11 @@
                 text-decoration: none;
                 text-transform: uppercase;
             }
-
+            
             .m-b-md {
                 margin-bottom: 30px;
             }
+
         </style>
     </head>
     <body>
@@ -79,9 +80,9 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    H-Gantt
+                    H-Gantt<span class="version">{{ $version }}</span>
                 </div>
-
+                
                 <div class="links">
                     <a href="https://laravel.com/docs">Documentation</a>
                     <a href="https://laracasts.com">Laracasts</a>

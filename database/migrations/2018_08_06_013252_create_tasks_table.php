@@ -18,10 +18,10 @@ class CreateTasksTable extends Migration
             $table->foreign('project_id')->references('id')->on('projects');
             $table->increments('id');
 
-            $table->string('name')->nullable(false);//can't be null
-            $table->string('code')->nullable(null);
+            $table->string('name',64)->nullable(false);//can't be null
+            $table->string('code',64)->nullable(null);
             $table->integer('level')->default(0);
-            $table->string('status')->default("STATUS_SUSPENDED");
+            $table->string('status',64)->default("STATUS_SUSPENDED");
             $table->dateTime('start')->default(DB::raw('NOW()'));
             $table->integer('duration')->default(0);
             $table->dateTime('end')->default(DB::raw('NOW()'));
@@ -30,14 +30,14 @@ class CreateTasksTable extends Migration
 
             $table->boolean('progress_by_worklog')->default(false); // 'progressByWorklog'
             $table->integer('relevance')->default(0);
-            $table->string('type')->default("");
+            $table->string('type',64)->default("");
             $table->integer('type_id')->default(0);// 'typeId'
             $table->boolean('can_write')->default(true);// 'canWrite'
             $table->boolean('collapsed')->default(false);
             $table->boolean('has_child')->default(false);// 'hasChild' 
             // $table->assigs -- this array will be created by the database
-            $table->string('depends')->nullable(true);
-            $table->string('description')->nullable(true);
+            $table->string('depends',128)->nullable(true);
+            $table->string('description',128)->nullable(true);
             $table->integer('progress')->default(0);
             $table->boolean('delete_flag')->default(false);
             $table->timestamps();

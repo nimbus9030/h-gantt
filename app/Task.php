@@ -7,16 +7,21 @@ use Illuminate\Support\Facades\DB;
 use Project;
 use Assig;
 use Illuminate\Support\Carbon;
+use Exception;
 
 class Task extends Model
 {
 	public $collapsed = false;
 	public $has_child = false;
+	private $projectId;//this is variable is class-only. Laravel model won't use this variable in query
 
 	public function __construct() {
 		$this->setTable("tasks");
 	}
 
+	public function setProjectId($projectId) {
+		$this->projectId = $projectId;
+	}
 	/*
 	Returns all valid tasks based on project's id
 
@@ -66,8 +71,8 @@ class Task extends Model
 
 		$response = array("stat" => false, "error" => "", "new_ids" => array());
 		try {
-			if (!isset($this->project_id)) {
-				throw Exception("project id does not exist");
+			if (!isset($this->projectId)) {
+				throw new Exception("project id does not exist");
 			}
 			DB::beginTransaction();
 			$bError = false;
@@ -75,7 +80,7 @@ class Task extends Model
 			foreach($taskArray["tasks"] as $task) {
 
 				if (gettype($task["id"]) == "string") {
-					// $this->project_id = $task["project_id"];
+					$this->project_id = $this->projectId;//use our class variable and give it to eloquent
 					$this->name = $task["name"];
 					$this->code = $task["code"];
 					$this->level = $task["level"];
@@ -98,8 +103,10 @@ class Task extends Model
 						$this->collapsed = $task["collapsed"];
 					if (isset($task["has_child"]))
 						$this->has_child = $task["hasChild"];
+
 					//new record
 					$result = $this->save();
+
 					if ($result) {
 						//save assignment(s) - even if $task["assigs"] is null
 						$res1 = $assig->setAssignments($task["assigs"],$this->id);
@@ -110,8 +117,8 @@ class Task extends Model
 					//existing record
 					$result = $this->where([
 						[ 'id','=',$task["id"] ],
-						[ 'project_id', '=', $this->project_id ],
-						[ 'delete_flag', '=', 'false']
+						[ 'project_id', '=', $this->projectId ],
+						[ 'delete_flag', '=', false]
 					])->update([
 						'name' => $task["name"],
 						'code' => $task["code"],
@@ -169,7 +176,8 @@ class Task extends Model
 			}
 		}
 		catch(Exception $e) {
-			$response["error"] = $e->getMessages();
+			$response["stat"] = false;
+			$response["error"] = $e->getMessage();
 			DB::rollback();
 		}
 		// dd("done");
