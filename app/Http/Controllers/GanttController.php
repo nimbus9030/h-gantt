@@ -39,10 +39,12 @@ class GanttController extends Controller
       if ($varName === "canLoadProject") {
         //If user is the owner, access is allowed for everything
         if ($project->owner == $user->id) return true;
-        $resources = Session::put('resources');
-        foreach($resources as $res) {
-          if ($res["user_id"] == $user->id) {
-            return true;
+        $resources = Session::get('resources');
+        if($resources) {
+          foreach($resources as $res) {
+            if ($res["userId"] == $user->id) {
+              return true;
+            }
           }
         }
       }
@@ -71,11 +73,6 @@ class GanttController extends Controller
       Session::put('project', $project);
       $resources = new Resource();
 
-      $result = $this->checkAccess("canLoadProject");
-      if ($result === false) {
-        return redirect('/home');
-      }
-
       try {
         $result = $resources->getAllResources($project->id);
         if ($result) {
@@ -87,6 +84,11 @@ class GanttController extends Controller
       }
       catch(\Illuminate\Database\QueryException $ex) {
         Session::put('resources', array());
+      }
+
+      $result = $this->checkAccess("canLoadProject");
+      if ($result === false) {
+        return redirect('/home');
       }
 
       //verify that the user really has access to at least view this project, otherwise send user back to 'home' screen

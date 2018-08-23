@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-	$version = "v2018.8.22.1142";
+	$version = "v2018.8.22.1643";
     return view('welcome',compact('version'));
 });
 
