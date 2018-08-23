@@ -89,7 +89,8 @@ class HomeController extends Controller
         $result = Project::getlist($params);
         if(!empty($result)) {
             foreach($result["data"] as $r) {
-                $rows[] = array($r["name"],$r["description"],$r["owner"],$r["status"],0,$r["id"]); //0 = actions column
+                $access = ($r["owner"] == $user["id"]) ? 1 : 2;//1=owner, 2=member
+                $rows[] = array($r["name"],$r["description"],$access,$r["status"],0,$r["id"]); //0 = actions column
             }
             $maxRows = $result["total"];
         }

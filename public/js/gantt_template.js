@@ -596,11 +596,20 @@ function editResources(newResArray){
   //   resTbl.append($.JST.createFromTemplate({id:"new",name:"resource"}, "RESOURCE_ROW"))
   // });
 
-  //append invite users
+  //append invite users. If the user added this user to the project team but hasn't saved the project yet, 
+  // don't display that user in this list.
   var inviteTbl=resourceEditor.find("#inviteTable");
   for (var i=0;i<newResArray.length;i++){
     var res=newResArray[i];
-    inviteTbl.append($.JST.createFromTemplate(res, "ADDUSER_ROW"))
+    var bAlreadyInTeam = false;
+    for (var j=0;j<ge.resources.length;j++){
+      if (ge.resources[j].userId == res.id) {
+        bAlreadyInTeam = true;
+        break;
+      }
+    }
+    if(!bAlreadyInTeam)
+      inviteTbl.append($.JST.createFromTemplate(res, "ADDUSER_ROW"))
   }
   // for (var i=0;i<ge.newResources.length;i++){
   //   var res=ge.newResources[i];
@@ -875,7 +884,6 @@ function showBaselineInfo (event,element){
       newRes.name = res.name;
       newRes.access = 2;
       newRes.rate = 0;
-      console.log(newRes);
       resTbl.append($.JST.createFromTemplate(newRes, "RESOURCE_ROW"));
       return false;//prevent dialog box from closing after pressing trashcan icon
     });

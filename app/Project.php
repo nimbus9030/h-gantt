@@ -14,15 +14,15 @@ class Project extends Model
 
 		Get list of all projects that the user is the owner of and/or a team member of.
 
-		SELECT DISTINCT ON (projects.id) projects.id,projects.name,projects.description,projects.status,projects.owner
+		SELECT DISTINCT projects.id,projects.id,projects.name,projects.description,projects.status,projects.owner
 		FROM projects
 		LEFT JOIN resources ON projects.id = resources.project_id
 		WHERE projects.delete_flag = false AND (owner = $params["userId"] OR resources.user_id = $params["userId"])
 		    AND (name LIKE %$params["searchfilter"]%)
 		GROUP BY projects.id
 		ORDER BY $params["iSortCol_0"] $params["sSortDir_0"]
-		OFFET $params["iDisplayStart"]
 		LIMIT $params["iDisplayLength"]
+		OFFSET $params["iDisplayStart"]
 
 		then paginate the results
 	*/
