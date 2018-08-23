@@ -66,14 +66,14 @@ class Resource extends Model
 
 			//if we are not updating this resource, delete it later.
 			$oldResources = $this->getAllResources($this->projectId);
-
 			foreach($resArray as $res) {
 
 				if (gettype($res["resourceId"]) == "string") {
 					//no 'name' column in resource: $this->name = $res["name"];
 					$this->rate = $res["rate"];
+					$this->access = $res["access"];
 					$this->project_id = $this->projectId;
-					$this->user_id = $this->userId;
+					$this->user_id = $res["userId"];
 					//new record
 					$result = $this->save();
 				}
@@ -88,11 +88,12 @@ class Resource extends Model
 						//no 'name' column in resource 'name' => $res["name"],
 						'rate' => $res["rate"],
 					]);
-					//don't auto-delete this resource because we need it
-					foreach($oldResources as $key=>$oldRes) {
-						if ($oldRes["id"] == $res["resourceId"]) {
-							break;
-						}
+				}
+				//don't auto-delete this resource because we need it
+				foreach($oldResources as $key=>$oldRes) {
+					if ($oldRes["id"] == $res["resourceId"]) {
+						unset($oldResources[$key]);
+						break;
 					}
 				}
 				if ($result === false) {
